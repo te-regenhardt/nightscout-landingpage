@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<title>ManuHome</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href='stylesheets/w3/w3.css'>
+<link rel='stylesheet' href='stylesheets/roboto/css.css'>
+<link rel="stylesheet" href="stylesheets/fontawesome/css/font-awesome.min.css">
+
+<style>
+	html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
+</style>
+<head>
+	<script src="js/plotly-2.4.2.min.js"></script>
+</head>
+
+<body class="w3-light-grey">
+	<!-- Page container -->
+	<div class="w3-content w3-margin-top" style="max-width:1400px;">
+		<!-- The grid -->
+		<div class="w3-row-padding">
+			<!-- Left column -->
+			<div class="w3-third">
+			
+				<!-- Avatar and greetings -->
+				<div class="w3-white w3-text-grey w3-card-4">
+					<div class="w3-display-container">
+						<img src="images/home.jpg" style="width:100%" alt="Avatar">
+						<div class="w3-display-bottomleft w3-container w3-text-white">
+							<h2>Welcome home.</h2>
+						</div>
+					</div>
+					
+					<!-- Link section -->
+					<div class="w3-container">
+						<hr>
+						<p class="w3-large"><b><i class="fa fa-envelope fa-fw w3-margin-right w3-text-teal"></i> Email and Work</b></p>
+				  
+						<p><a href="https://mail.google.com" style="text-decoration: none">Google Mail</a></p>
+						<div class="w3-light-grey w3-round-xlarge w3-small"></div>
+						<p><a href="https://your-work-email-here.com" style="text-decoration: none">ESE Portal</a> | <a href="https://intranet.ese.de/de/" style="text-decoration: none">Intranet</a> | <a href="https://ese.mitarbeiterangebote.de/login" style="text-decoration: none">Corporate Benefits</a></p>
+						<div class="w3-light-grey w3-round-xlarge w3-small"></div>
+						<p><a href="https://webmail.hoster.com" style="text-decoration: none">Webspace Mail</a> | <a href="https://login.webgo.de/login" style="text-decoration: none">Webspace Admin</a></p>
+						<div class="w3-light-grey w3-round-xlarge w3-small"></div>
+						<p><a href="https://mail.university.com" style="text-decoration: none">University Mail</a></p>
+						<div class="w3-light-grey w3-round-xlarge w3-small"></div>
+						<br>
+						
+						<p class="w3-large w3-text-theme"><b><i class="fa fa-comments fa-fw w3-margin-right w3-text-teal"></i>Message Boards</b></p>
+				  
+						<p><a href="https://www.musiker-board.de/forum/" style="text-decoration: none">Musiker Board</a></p>
+						<div class="w3-light-grey w3-round-xlarge"></div>
+						<p><a href="https://www.talkbass.com/forums/" style="text-decoration: none">Talk Bass</a></p>
+						<div class="w3-light-grey w3-round-xlarge"></div>
+						<p><a href="https://insulinclub.de/" style="text-decoration: none">InsulinClub</a></p>
+						<div class="w3-light-grey w3-round-xlarge"></div>
+						<br>
+						
+						<p class="w3-large w3-text-theme"><b><i class="fa fa-users fa-fw w3-margin-right w3-text-teal"></i>Social Media</b></p>
+						
+						<p><a href="https://discord.com/channels/@me" style="text-decoration: none">Discord</a></p>
+						<div class="w3-light-grey w3-round-xlarge"></div>
+						<p><a href="https://twitter.com" style="text-decoration: none">Twitter</a></p>
+						<div class="w3-light-grey w3-round-xlarge"></div>
+						<p><a href="https://facebook.com" style="text-decoration: none">Facebook</a></p>
+						<div class="w3-light-grey w3-round-xlarge"></div>
+						<p><a href="https://instagram.com" style="text-decoration: none">Instagram</a></p>
+						<div class="w3-light-grey w3-round-xlarge"></div>
+						<p><a href="https://linkedin.com" style="text-decoration: none">LinkedIn</a></p>
+						<div class="w3-light-grey w3-round-xlarge"></div>
+						<br>
+					</div>
+				</div>
+				<br>
+
+			<!-- End Left Column -->
+			</div>
+
+			<!-- Right Column -->
+			<div class="w3-twothird">
+				<div class="w3-container w3-card w3-white w3-margin-bottom">
+					<h2 class="w3-text-grey w3-padding-16"><i class="fa fa-thermometer-half fa-fw w3-margin-right w3-xxlarge w3-text-teal"></i>BLOOD GLUCOSE LEVEL</h2>
+				
+					<div id="BG" style="width:800px;height:300px;"></div>
+					<script>
+						// API adress, timestep of readings (minutes), and number of entries to plot
+						const api_url 	= "https://LINK-TO-YOUR-NIGHTSCOUT-API";
+						const n_entries = 24;
+						const url 		= api_url + n_entries;
+						const timestep 	= 5;
+						
+				
+
+				
+						// Arrays for results
+						var sugars = [];
+						var times  = [];
+				
+						// fetch the BG data from the API and write results into arrays
+						fetch(url)
+							.then((resp) => {return resp.json()})
+							.then(  
+								(result) => {
+									// read glucose values from json
+									for (let i = 0; i < n_entries; i++) {times[i] = result[i]["dateString"]}
+									for (let i = 0; i < n_entries; i++) {sugars[i] = result[i]["sgv"]}
+									
+									var trace1 = {
+										x: times,
+										y: sugars,
+										mode: 'lines+markers',
+										name: 'glucose values',
+										line: {	width: 3,
+												color: 'rgb(0,0,0)'},};
+
+										// Borderlines and filled areas
+										// target area for readings (to make things fancy):
+										const upperlim 	= 160;
+										const lowerlim 	= 80;
+										
+										// Upper limit for target area (green bar from 80-180
+										var fill1 = {
+											x: [times[0], times[times.length-1]],
+											y: [upperlim, upperlim],
+											mode: 'lines',
+											name: 'upper boundary',
+											line: {	shape: 'spline', 
+													color: 'rgb(0, 148, 89)', 
+													width: 1},
+											fill: 'tozeroy'
+											};
+										
+										// Lower limit for target area (green)
+										var fill2 = {
+											x: [times[0], times[times.length-1]],
+											y: [lowerlim, lowerlim],
+											mode: 'lines',
+											name: 'lower boundary 1',
+											line: {	color: 'rgb(0, 148, 89)', 
+													width: 1},
+											};
+										
+										// lower limit, but fill the area from 0:lowerlimit a little more bright
+										var fill3 = {
+											x: [times[0], times[times.length-1]],
+											y: [lowerlim,lowerlim],
+											mode: 'lines',
+											name: 'lower boundary 2',
+											line: {	color: 'rgb(255, 255, 255)', 
+													width: 1},
+											fill: 'tozeroy'
+											};
+										
+										// Configuration of the plot
+										var data = [trace1, fill1, fill2, fill3];
+	
+										var layout = { 
+											font: {size: 18},
+											showlegend: false,
+											xaxis: {	title: 'Time [min]'},
+											yaxis: {	title: 'Glucose level [mg/dL]',
+														range: [0,400]}
+											};
+
+										var config = {	responsive: true, 
+														displaylogo: false}
+
+										Plotly.newPlot('BG', data, layout, config );		
+							}
+								);		
+					</script>
+					
+					<div class="w3-container">
+						<h6 class="w3-text-teal"><i class="fa fa-desktop fa-fw w3-margin-right"></i>
+							<a href="https://LINK-TO-YOUR-NIGHTSCOUT.herokuapps.com" style="text-decoration: none">Visit Nightscout</a> |
+							<a href="https://nightscout-reporter.zreptil.de/" style="text-decoration: none">Nightscout Reporter</a> |
+							<a href="https://id.heroku.com/login" style="text-decoration: none">Heroku Admin</a> |
+							<a href="https://uptimerobot.com/" style="text-decoration: none">Uptime Robot</a> 
+						</h6>
+					</div> 
+				</div>
+
+				<div class="w3-container w3-card w3-white">
+					<h2 class="w3-text-grey w3-padding-16"><i class="fa fa-newspaper-o fa-fw w3-margin-right w3-xxlarge w3-text-teal"></i>News</h2>
+					<div class="w3-container">
+						<!-- start sw-rss-feed code --> 
+						<script type="text/javascript"> 
+							rssfeed_url 						= new Array(); 
+							rssfeed_url[0]						="https://www.faz.net/rss/aktuell/";  
+							rssfeed_frame_width					="800"; 
+							rssfeed_frame_height				="400"; 
+							rssfeed_scroll						="off"; 
+							rssfeed_scroll_step					="6"; 
+							rssfeed_scroll_bar					="on"; 
+							rssfeed_target						="_blank"; 
+							rssfeed_font_size					="12"; 
+							rssfeed_font_face					=""; 
+							rssfeed_border						="off"; 
+							rssfeed_css_url						=""; 
+							rssfeed_title						="on"; 
+							rssfeed_title_name					="FAZ - Aktuell"; 
+							rssfeed_title_bgcolor				="#009688"; 
+							rssfeed_title_color					="#000"; 
+							rssfeed_title_bgimage				=""; 
+							rssfeed_footer						="off"; 
+							rssfeed_footer_name					="rss feed"; 
+							rssfeed_footer_bgcolor				="#fff"; 
+							rssfeed_footer_color				="#333"; 
+							rssfeed_footer_bgimage				=""; 
+							rssfeed_item_title_length			="80"; 
+							rssfeed_item_title_color			="#666"; 
+							rssfeed_item_bgcolor				="#fff"; 
+							rssfeed_item_bgimage				=""; 
+							rssfeed_item_border_bottom			="on"; 
+							rssfeed_item_source_icon			="off"; 
+							rssfeed_item_date					="on"; 
+							rssfeed_item_description			="on"; 
+							rssfeed_item_description_length		="130"; 
+							rssfeed_item_description_color		="#000"; 
+							rssfeed_item_description_link_color	="#333"; 
+							rssfeed_item_description_tag		="off"; 
+							rssfeed_no_items					="10"; 
+							rssfeed_cache 						= "32fd46878770a30a5efe0ec042b283a4"; 
+						</script> 
+						<script type="text/javascript" src="js/rss-feed.js"></script> 
+						<!-- end sw-rss-feed code -->
+						<hr>
+					</div>
+				</div>
+			<!-- End Right Column -->
+			</div>
+			<!-- End Grid -->
+		</div>
+		<!-- End Page Container -->
+	</div>
+
+	<footer class="w3-container w3-teal w3-center w3-margin-top">
+		<p>The only good thing about hitting rock bottom is that it can't get any worse.</p>
+	</footer>
+</body>
+</html>
